@@ -19,7 +19,7 @@ func FailOnError(err error) {
 	}
 }
 
-func EmailExists(db *sql.DB, userToRegister user.User) bool {
+func emailExists(db *sql.DB, userToRegister user.User) bool {
 	userCheckQuery := "Select username from users where email = ?"
 	rows := db.QueryRow(userCheckQuery, userToRegister.Email)
 	var email string
@@ -31,7 +31,7 @@ func EmailExists(db *sql.DB, userToRegister user.User) bool {
 	return true
 }
 
-func UserExists(db *sql.DB, userToRegister user.User) bool {
+func userExists(db *sql.DB, userToRegister user.User) bool {
 	userCheckQuery := "Select username from users where username = ?"
 	rows := db.QueryRow(userCheckQuery, userToRegister.Username)
 	var username string
@@ -66,9 +66,9 @@ func SetUserPasswordAsHash(user *user.User) {
 
 func ValidateUser(responseWriter *http.ResponseWriter, db *sql.DB, userToRegister user.User) bool {
 	// fmt.Println(isValidUsername(db, userToRegister))
-	if UserExists(db, userToRegister) {
+	if userExists(db, userToRegister) {
 		(*responseWriter).Write([]byte("username already exists"))
-	} else if EmailExists(db, userToRegister) {
+	} else if emailExists(db, userToRegister) {
 		(*responseWriter).Write([]byte("Email already exists"))
 	} else {
 		if !userHelpers.ValidUser(&userToRegister) {
@@ -80,13 +80,31 @@ func ValidateUser(responseWriter *http.ResponseWriter, db *sql.DB, userToRegiste
 	return false
 }
 
-func IsValidPassword(db *sql.DB, user user.User) bool {
+func isValidPassword(db *sql.DB, user user.User) bool {
 	userCheckQuery := "Select password from users where username = ?"
 	rows := db.QueryRow(userCheckQuery, user.Username)
 	var passwordInDB string
 	err := rows.Scan(&passwordInDB)
 	if !password.VerifyPassword(passwordInDB, user.Password) || err == sql.ErrNoRows {
 		return false
+	}
+	return true
+}
+
+func ValidateLogin(db *sql.DB, responseWriter *http.ResponseWriter, user user.User) bool {
+	if !emailExists(db, user) || !userExists(db, user) {
+		(*responseWriter).Write([]byte("User Does not Exist"))
+	} else {
+		if !userExists(db, user) {
+			(*responseWriter).Write([]byte("User Does Not Exist Please Register"))
+		} else {
+			if isValidPassword(db, user) {
+				(*responseWriter).Write([]byte("User Logged In"))
+			} else {
+				(*responseWriter).Write([]byte("Invalid Password"))
+			}
+			return false
+		}
 	}
 	return true
 }

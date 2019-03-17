@@ -46,17 +46,4 @@ func Login(responseWriter http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	if !registerAndLoginHelpers.EmailExists(db, user) || !registerAndLoginHelpers.UserExists(db, user) {
-		responseWriter.Write([]byte("User Does not Exist"))
-	} else {
-		if !registerAndLoginHelpers.UserExists(db, user) {
-			responseWriter.Write([]byte("User Does Not Exist Please Register"))
-		} else {
-			if registerAndLoginHelpers.IsValidPassword(db, user) {
-				responseWriter.Write([]byte("User Logged In"))
-			} else {
-				responseWriter.Write([]byte("Invalid Password"))
-			}
-		}
-	}
 }
