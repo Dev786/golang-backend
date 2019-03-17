@@ -47,12 +47,12 @@ func Login(responseWriter http.ResponseWriter, request *http.Request) {
 	defer db.Close()
 	err := userHelpers.ParseJSONToUser(&user, request.Body)
 	if err != nil {
-		panic(err)
+		registerAndLoginHelpers.FailOnError(err)
 	}
 	if registerAndLoginHelpers.ValidateLogin(db, &responseWriter, user) {
 		sessionId, err := sessionHelpers.CreateSession(user.Username)
 		if err != nil {
-			panic(err)
+			registerAndLoginHelpers.FailOnError(err)
 		} else {
 			cookie := http.Cookie{
 				Name:    "session_token",
