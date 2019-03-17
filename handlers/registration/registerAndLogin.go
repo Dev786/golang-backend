@@ -2,12 +2,15 @@ package registerAndLogin
 
 import (
 	"net/http"
+	"time"
 
 	"../../models/user"
 
 	"../../helpers/user"
 
 	"../../helpers/registration"
+
+	"../../helpers/session"
 
 	"database/sql"
 
@@ -47,6 +50,16 @@ func Login(responseWriter http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	if registerAndLoginHelpers.ValidateLogin(db, &responseWriter, user) {
-		responseWriter.Write([]byte("User logged in"))
+		session, err := sessionHelpers.CreateSession(user.Username)
+		if err != nil {
+			panic(err)
+		} else {
+			http.SetCookie(responseWriter, &http.Cookie{
+				Name:    "session_token",
+				Value:   session,
+				Expires: time.Now().Add(120 * time.Second),
+			})
+			responseWriter.Write([]byte("User Successfully Logged In"))
+		}
 	}
 }
