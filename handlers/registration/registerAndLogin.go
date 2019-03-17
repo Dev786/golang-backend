@@ -46,4 +46,7 @@ func Login(responseWriter http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	if registerAndLoginHelpers.ValidateLogin(db, &responseWriter, user) {
+		responseWriter.Write([]byte("User logged in"))
+	}
 }
