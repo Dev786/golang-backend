@@ -50,16 +50,17 @@ func Login(responseWriter http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	if registerAndLoginHelpers.ValidateLogin(db, &responseWriter, user) {
-		session, err := sessionHelpers.CreateSession(user.Username)
+		sessionId, err := sessionHelpers.CreateSession(user.Username)
 		if err != nil {
 			panic(err)
 		} else {
-			http.SetCookie(responseWriter, &http.Cookie{
+			cookie := http.Cookie{
 				Name:    "session_token",
-				Value:   session,
+				Value:   sessionId,
 				Expires: time.Now().Add(120 * time.Second),
-			})
-			responseWriter.Write([]byte("User Successfully Logged In"))
+			}
+			http.SetCookie(responseWriter, &cookie)
+			responseWriter.Write([]byte("User Login Successfully "))
 		}
 	}
 }

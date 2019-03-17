@@ -93,18 +93,11 @@ func isValidPassword(db *sql.DB, user user.User) bool {
 
 func ValidateLogin(db *sql.DB, responseWriter *http.ResponseWriter, user user.User) bool {
 	if !emailExists(db, user) || !userExists(db, user) {
-		(*responseWriter).Write([]byte("User Does not Exist"))
-	} else {
-		if !userExists(db, user) {
-			(*responseWriter).Write([]byte("User Does Not Exist Please Register"))
-		} else {
-			if isValidPassword(db, user) {
-				(*responseWriter).Write([]byte("User Logged In"))
-			} else {
-				(*responseWriter).Write([]byte("Invalid Password"))
-			}
-			return false
-		}
+		(*responseWriter).Write([]byte("User Does not Exist Please Register"))
+		return false
+	} else if !isValidPassword(db, user) {
+		(*responseWriter).Write([]byte("Invalid Password"))
+		return false
 	}
 	return true
 }
